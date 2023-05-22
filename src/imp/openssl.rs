@@ -373,6 +373,20 @@ impl TlsAcceptor {
         }
         supported_protocols(builder.min_protocol, builder.max_protocol, &mut acceptor)?;
 
+        if builder.verify {
+            acceptor.set_verify(SslVerifyMode::PEER); // TODO: SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
+        }
+
+        if builder.disable_built_in_roots {
+            acceptor.set_cert_store(X509StoreBuilder::new()?.build());
+        }
+
+        for cert in &builder.root_certificates {
+            if let Err(err) = acceptor.cert_store_mut().add_cert((cert.0).0.clone()) {
+                debug!("add_cert error: {:?}", err);
+            }
+        }
+
         Ok(TlsAcceptor(acceptor.build()))
     }
 

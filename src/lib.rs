@@ -521,6 +521,9 @@ pub struct TlsAcceptorBuilder {
     identity: Identity,
     min_protocol: Option<Protocol>,
     max_protocol: Option<Protocol>,
+    verify: bool,
+    root_certificates: Vec<Certificate>,
+    disable_built_in_roots: bool,
 }
 
 impl TlsAcceptorBuilder {
@@ -541,6 +544,33 @@ impl TlsAcceptorBuilder {
     /// Defaults to `None`.
     pub fn max_protocol_version(&mut self, protocol: Option<Protocol>) -> &mut TlsAcceptorBuilder {
         self.max_protocol = protocol;
+        self
+    }
+
+    /// Options controlling the behavior of certificate verification.
+    ///
+    /// Defaults to `false`. When set to `true` -- a certificate is requsted but the client does not have to send one.
+    pub fn verify(&mut self, verify: bool) -> &mut TlsAcceptorBuilder {
+        self.verify = verify;
+        self
+    }
+
+    /// Adds a certificate to the set of roots that the acceptor will trust.
+    ///
+    /// The acceptor will use the system's trust root by default. This method can be used to add
+    /// to that set when authenticating the clients not trusted by the system.
+    ///
+    /// Defaults to an empty set.
+    pub fn add_root_certificate(&mut self, cert: Certificate) -> &mut TlsAcceptorBuilder {
+        self.root_certificates.push(cert);
+        self
+    }
+
+    /// Controls the use of built-in system certificates during certificate validation.
+    ///
+    /// Defaults to `false` -- built-in system certs will be used.
+    pub fn disable_built_in_roots(&mut self, disable: bool) -> &mut TlsAcceptorBuilder {
+        self.disable_built_in_roots = disable;
         self
     }
 
@@ -608,6 +638,9 @@ impl TlsAcceptor {
             identity,
             min_protocol: Some(Protocol::Tlsv10),
             max_protocol: None,
+            verify: false,
+            root_certificates: vec![],
+            disable_built_in_roots: false,
         }
     }
 
