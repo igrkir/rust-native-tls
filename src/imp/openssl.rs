@@ -374,7 +374,7 @@ impl TlsAcceptor {
         supported_protocols(builder.min_protocol, builder.max_protocol, &mut acceptor)?;
 
         if builder.verify {
-            acceptor.set_verify(SslVerifyMode::PEER); // TODO: SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE
+            acceptor.set_verify(SslVerifyMode::PEER | SslVerifyMode::FAIL_IF_NO_PEER_CERT);
         }
 
         if builder.disable_built_in_roots {
